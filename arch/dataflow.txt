@@ -1,0 +1,85 @@
+@startuml
+left to right direction
+skinparam monochrome true
+together {
+ component Client as c
+ interface POST as c_post
+ interface GET as c_get
+ interface WS as c_ws
+ c .. c_ws
+ c .. c_get
+ c .. c_post
+}
+
+together {
+ interface WS as s_ws
+ interface GET as s_get
+ interface POST as s_post
+ component Mojo as s
+ interface PUBSUB as s_ps
+ interface SQL as s_sql
+ database "File storage" as s_fs
+ s_ws .. s
+ s_get .. s
+ s_post .. s
+ s .. s_ps
+ s .. s_sql
+ s_fs - s
+}
+
+together {
+ component DB as db
+ interface SQL as db_sql
+ interface PUBSUB as db_ps
+ db_sql .. db
+ db_ps .. db
+}
+
+file "File upload" as post1
+c_post --> post1
+post1 --> s_post
+
+file "File download" as get1
+c_get <-- get1
+get1 <-- s_get
+
+file "Start session" as get2
+c_get --> get2
+get2 --> s_get
+
+file "Connect to session" as get3
+c_get --> get3
+get3 --> s_get
+
+file "Text message" as ws1
+c_ws <--> ws1
+ws1 <--> s_ws
+
+file "Peer status" as ws2
+c_ws <-- ws2
+ws2 <-- s_ws
+
+file "File status" as ws3
+c_ws <-- ws3
+ws3 <-- s_ws
+
+file "Text message notification" as ps1
+s_ps <--> ps1
+ps1 <--> db_ps
+
+file "Peer status notification" as ps2
+s_ps <--> ps2
+ps2 <--> db_ps
+
+file "File status notification" as ps3
+s_ps <--> ps3
+ps3 <--> db_ps
+
+file "Session info" as sql1
+s_sql <--> sql1
+sql1 <--> db_sql
+
+file "Text of the message" as sql2
+s_sql <--> sql2
+sql2 <--> db_sql
+@enduml
