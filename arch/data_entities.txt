@@ -1,0 +1,68 @@
+@startuml
+skinparam monochrome true
+skinparam classFontStyle bold
+skinparam classAttributeIconSize 0
+hide circle
+hide empty members
+
+class "File upload" {
+ Binary data
+}
+class "File download" {
+ Binary data
+}
+class "Start session" {
+ <empty>
+}
+class "Connect to session" {
+ session_id
+}
+class "Text message" {
+ type: text
+ payload: message
+}
+class "Peer status" {
+ type: peer
+ payload: [peer_id => 0/1, ]
+}
+class "File status" {
+ type: file
+ payload: 0/1
+}
+class "File URL" {
+ type: link
+ payload: URL
+}
+class "Text message notification" {
+ type: text
+ src: peer_id
+ payload: text_id
+}
+class "Peer status notification" {
+ type: peer
+ src: peer_id
+ payload: 0/1
+}
+class "File status notification" {
+ type: file
+ src: peer_id
+ payload: 0/1
+}
+class "Session info" {
+ id
+ password
+ total_files
+ total_peers
+ curr_files
+ curr_peers
+ ..
+ +get_free_files()
+ +get_free_peers()
+}
+class "Text of the message" {
+ id (DB sequence)
+ ..
+ session_id
+ text
+}
+@enduml

@@ -63,6 +63,10 @@ file "File status" as ws3
 c_ws <-- ws3
 ws3 <-- s_ws
 
+file "File URL" as ws4
+c_ws <-- ws4
+ws4 <-- s_ws
+
 file "Text message notification" as ps1
 s_ps <--> ps1
 ps1 <--> db_ps
