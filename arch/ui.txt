@@ -1,0 +1,58 @@
+@startuml
+skinparam monochrome true
+
+!unquoted procedure SALT($x)
+"{{
+salt
+%invoke_procedure("_"+$x)
+}}" as $x
+!endprocedure
+
+!procedure _error()
+{
+<b>error
+Error message
+[Back]
+}
+!endprocedure
+
+!procedure _startsession()
+{
+<b>start
+[New session]
+"Connect to ID"
+}
+!endprocedure
+
+!procedure _connect()
+{
+<b>connect
+Session ID: 123456
+URL to connect: https://.../123456
+QR-code: <&image>
+[Return home]
+}
+!endprocedure
+
+!procedure _session()
+{
+<b>session
+text
+text
+text
+"Message     " | [Send]
+"Select file " | [Send file]
+[End session]
+}
+!endprocedure
+
+(*) -right-> SALT(startsession)
+startsession -down-> SALT(error)
+startsession -right-> SALT(connect)
+connect -left-> startsession
+connect -right-> SALT(session)
+connect -down-> error
+session -left-> startsession
+session -down-> error
+session -right-> (*)
+@enduml
