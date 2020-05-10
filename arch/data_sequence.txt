@@ -11,6 +11,8 @@ c -> s : POST file data
 s -> s : // validate HTTP session //
 s -> s : // process file slots //
 s -> fs : // write file data //
+s -> db : file info
+db -> s : // id //
 s -> db : file status notification
 ...
 db -> s : file status notification
@@ -18,11 +20,13 @@ s -> c : file status
 s -> db : file notification
 ...
 db -> s : file notification
+db -> s : file info
 s -> c : file URL
 
 == File download ==
 c -> s : // GET file URL //
 s -> s : // validate HTTP session //
+db -> s : file info
 s -> c : RenderFile
 s -> db : file status notification
 ...

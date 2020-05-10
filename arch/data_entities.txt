@@ -70,4 +70,11 @@ class "Text of the message" {
  session_id
  text
 }
+class "File info" {
+ id (DB sequence)
+ ..
+ session_id
+ name
+ path
+}
 @enduml
