@@ -48,6 +48,11 @@ class "File status notification" {
  src: peer_id
  payload: 0/1
 }
+class "File notification" {
+ type: link
+ src: peer_id
+ payload: URL
+}
 class "Session info" {
  id
  password

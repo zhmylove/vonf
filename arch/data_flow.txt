@@ -79,6 +79,10 @@ file "File status notification" as ps3
 s_ps <--> ps3
 ps3 <--> db_ps
 
+file "File notification" as ps4
+s_ps <--> ps4
+ps4 <--> db_ps
+
 file "Session info" as sql1
 s_sql <--> sql1
 sql1 <--> db_sql

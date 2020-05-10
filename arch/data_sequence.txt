@@ -1,0 +1,77 @@
+@startuml
+skinparam monochrome true
+
+participant Client as c
+participant Mojo as s
+database "File storage" as fs
+participant DB as db
+
+== File upload ==
+c -> s : POST file data
+s -> s : // validate HTTP session //
+s -> s : // process file slots //
+s -> fs : // write file data //
+s -> db : file status notification
+...
+db -> s : file status notification
+s -> c : file status
+s -> db : file notification
+...
+db -> s : file notification
+s -> c : file URL
+
+== File download ==
+c -> s : // GET file URL //
+s -> s : // validate HTTP session //
+s -> c : RenderFile
+s -> db : file status notification
+...
+db -> s : file status notification
+s -> c : file status
+
+== Text message ==
+c -> s : text message
+s -> s : // xml quote message //
+s -> db : text of the message
+db -> s : // id //
+s -> db : text message notification
+...
+db -> s : text message notification
+s -> s : // filter self peer //
+db -> s : text of the message
+s -> c : text message
+
+== Connect to session ==
+c -> s : GET connect to session
+s -> s : // process cookies //
+db -> s : session info
+s -> s : // process free slots //
+s -> s : // set response cookies //
+s -> c : // response //
+
+== Start session ==
+c -> s : GET start session
+s -> s : // process cookies //
+s -> s : // fill session info //
+s -> db : // session info //
+db -> s : // id //
+s -> c : // response //
+
+== Websocket connection ==
+c -> s : WS connect
+s -> s : // process cookies //
+db -> s : session info
+s -> db : // subscribe //
+
+== Websocket close ==
+c -> s : WS close
+s -> db : // unsubscribe //
+s -> s : // set Session timeout event //
+
+== Session timeout ==
+db -> s : session info
+s -> s : // check current websockets //
+s -> s : // clean up file storage //
+s -> db : // clean up text storage //
+s -> db : // clean up session info //
+@enduml
