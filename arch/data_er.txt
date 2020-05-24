@@ -1,0 +1,51 @@
+@startuml
+skinparam monochrome true
+
+hide circle
+hide empty members
+skinparam linetype ortho
+
+!unquoted procedure row($name, $type, $attr="")
+!str = $name + " : " + $type
+!if $attr != ""
+!str = str + " **<<" + $attr + ">>** "
+!endif
+str
+!endprocedure
+
+!unquoted procedure fk($name, $type)
+row($name, $type, foreign key)
+!endprocedure
+
+!unquoted procedure seq($name, $type)
+row($name, $type, seq)
+!endprocedure
+
+entity "Session" as s {
+row(id, int, primary key)
+--
+row(password, text)
+row(files_limit, int)
+row(files_current, int)
+row(peers_limit, int)
+row(peers_current, int)
+}
+
+entity "Messages" as msg {
+seq(id, int)
+--
+fk(session_id, int)
+row(text, text)
+}
+
+entity "Files" as files {
+seq(id, int)
+--
+fk(session_id, int)
+row(name, text)
+row(path, text)
+}
+
+s ||--o{ files
+s ||--o{ msg
+@enduml

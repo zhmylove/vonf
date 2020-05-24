@@ -1,0 +1,22 @@
+@startuml
+skinparam monochrome true
+
+hide circle
+hide empty members
+'skinparam classAttributeIconSize 0
+
+class "Session" as s {
++ new(password, files_limit, peers_limit) : int id
++ check_password(id, password) : bool
++ check_file_available(id) : bool
++ check_peer_available(id) : bool
++ get_file_info(id, file_id) : (name, path)
++ get_message(id, msg_id) : text
++ send_message(id, msg) : bool
++ send_file(id, filename, filepath) : bool
++ attach_peer_ws(id, callback) : bool
++ detach_peer_ws(id) : bool
+- generate_id() : int id
+- destroy_session(id) : bool
+}
+@enduml

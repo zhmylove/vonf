@@ -75,7 +75,8 @@ s -> s : // set Session timeout event //
 == Session timeout ==
 db -> s : session info
 s -> s : // check current websockets //
-s -> s : // clean up file storage //
+s -> s : // clean up file system //
 s -> db : // clean up text storage //
+s -> db : // clean up file storage //
 s -> db : // clean up session info //
 @enduml

@@ -56,10 +56,10 @@ class "File notification" {
 class "Session info" {
  id
  password
- total_files
- total_peers
- curr_files
- curr_peers
+ files_limit
+ files_current
+ peers_limit
+ peers_current
  ..
  +get_free_files()
  +get_free_peers()
