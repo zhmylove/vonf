@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title><%= config->{title} // 'VONF' %></title>
+      <script src="/js/jquery-3.5.0.min.js"></script>
+      <script src="/js/base64.js"></script>
+      <script src="/js/connect.js"></script>
+      <link rel="stylesheet" href="/css/connect.css"></link>
+   </head>
+   <body>
+      <div id="wrapper">
+         <%= $session_id %> | <%= $peer_id %>
+         <input type="hidden" id="session_id" value="<%= $session_id %>">
+         <div id="chat">
+         </div>
+         <br>
+         <textarea id="msg_text"></textarea>
+         <input type="button" id="msg_send" value="Send text"></input>
+         <br>
+         <input type="file" id="file_file"></input>
+         <input type="button" id="file_send" value="Send file"></input>
+         <br>
+         <input type="button" id="end_session" value="End session"></input>
+      </div>
+   </body>
+</html>

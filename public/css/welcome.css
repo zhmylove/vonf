@@ -1,0 +1,25 @@
+body {
+}
+
+#wrapper {
+   width: 20%;
+   left: 40%;
+   position: relative;
+}
+
+#id {
+   border: solid 1px;
+   padding-top: 15px;
+   padding-bottom: 15px;
+   width: 100%;
+   margin: 8px 0;
+   box-sizing: border-box;
+}
+
+#button {
+   border: solid 1px;
+   background-color: lightgreen;
+   padding-top: 15px;
+   padding-bottom: 15px;
+   width: 100%;
+}

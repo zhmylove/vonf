@@ -1,6 +1,9 @@
 package vonf;
 use Mojo::Base 'Mojolicious';
 
+use vonf::Model::Session;
+use Mojo::Pg;
+
 # This method will run once at server start
 sub startup {
   my $self = shift;
@@ -14,9 +17,16 @@ sub startup {
   # Postgres helper
   $self->helper(pg => sub { state $pg = Mojo::Pg->new($_[0]->config('pg')) });
 
+  # Instantiate DB
+  my $sql_file = $self->home->child('sql', 'vonf.sql');
+  $self->pg->auto_migrate(1)->migrations->from_file($sql_file)->migrate;
+
   # Model helper
   $self->helper(model_session => sub {
-        state $model_session = vonf::Model::Session->new(pg => $_[0]->pg)
+        state $model_session = vonf::Model::Session->new(
+           pg => $_[0]->pg,
+           config => $config,
+        )
      });
 
   # Regex for ID validation
@@ -27,13 +37,14 @@ sub startup {
 
   # Normal route to controller
   $r->get('/')->to('vonf#welcome');
-  $r->get('/connect/#id' => [id => $re_id])->to('vonf#connect');
+  $r->get('/c/#id' => [id => $re_id])->to('vonf#connect');
   $r->get('/start')->to('vonf#start');
 
-  my $auth = $r->under('/s/')->to('vonf#auth');
+  my $auth = $r->under('/s')->to('vonf#auth');
   $auth->websocket('ws/#id' => [id => $re_id])->to('vonf#ws');
   $auth->post('up/#id' => [id => $re_id])->to('vonf#upload');
   $auth->get('f/#id' => [id => $re_id])->to('vonf#download');
+  $auth->get('logout')->to('vonf#logout');
 }
 
 1;

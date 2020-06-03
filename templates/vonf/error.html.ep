@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title><%= config->{title} // 'VONF' %></title>
+   </head>
+   <body>
+      <p>
+      <%= $msg %>
+      <br>
+      <%= link_to 'Go home' => '/' %>
+      </p>
+   </body>
+</html>

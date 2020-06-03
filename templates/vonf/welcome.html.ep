@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title><%= config->{title} // 'VONF' %></title>
+      <script src="/js/jquery-3.5.0.min.js"></script>
+      <script src="/js/welcome.js"></script>
+      <link rel="stylesheet" href="/css/welcome.css"></link>
+   </head>
+   <body>
+      <div id="wrapper">
+         <input id="button" type="button" onClick="javascript: window.location.href='<%= url_for '/start' %>'" value="Start new">
+         <br>
+         <form id="form" onSubmit="return false;">
+            <input id="id" type="text" placeholder="Connect to">
+         </form>
+      </div>
+   </body>
+</html>

@@ -22,28 +22,29 @@ row($name, $type, seq)
 !endprocedure
 
 entity "Session" as s {
-row(id, int, primary key)
+* seq(id, int)
 --
-row(password, text)
-row(files_limit, int)
-row(files_current, int)
-row(peers_limit, int)
-row(peers_current, int)
+* row(password, text)
+* row(files_limit, int)
+* row(files_current, int)
+* row(peers_limit, int)
+* row(peers_current, int)
+* row(peers_ws, int)
 }
 
 entity "Messages" as msg {
-seq(id, int)
+* seq(id, int)
 --
-fk(session_id, int)
-row(text, text)
+* fk(session_id, int)
+* row(text, text)
 }
 
 entity "Files" as files {
-seq(id, int)
+* seq(id, int)
 --
-fk(session_id, int)
-row(name, text)
-row(path, text)
+* fk(session_id, int)
+* row(name, text)
+* row(path, text)
 }
 
 s ||--o{ files

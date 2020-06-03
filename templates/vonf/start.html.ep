@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title><%= config->{title} // 'VONF' %></title>
+      <script src="/js/jquery-3.5.0.min.js"></script>
+      <script src="/js/start.js"></script>
+      <link rel="stylesheet" href="/css/start.css"></link>
+   </head>
+   <body>
+      <div id="wrapper">
+         Session ID: <%= $session_id %>
+         <br>
+         URL to connect: <%= link_to 'Connect' => "/c/$session_id" %>
+         <br>
+         QR code
+         <br>
+         <%= link_to 'Go home' => '/' %>
+      </div>
+   </body>
+</html>

@@ -92,6 +92,6 @@ s_sql <--> sql2
 sql2 <--> db_sql
 
 file "File info" as sql3
-s_scl <--> sql3
+s_sql <--> sql3
 sql3 <--> db_sql
 @enduml
