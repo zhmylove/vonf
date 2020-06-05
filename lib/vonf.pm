@@ -8,6 +8,9 @@ use Mojo::Pg;
 sub startup {
   my $self = shift;
 
+  # Load plugins
+  $self->plugin('RenderFile');
+
   # Load configuration from hash returned by config file
   my $config = $self->plugin('Config');
 
@@ -20,6 +23,11 @@ sub startup {
   # Instantiate DB
   my $sql_file = $self->home->child('sql', 'vonf.sql');
   $self->pg->auto_migrate(1)->migrations->from_file($sql_file)->migrate;
+
+  # TODO maybe from confug?
+  # Folder for file uploads
+  $config->{file_base} = $self->home->child('upload');
+  die "$config->{file_base}: no such directory" unless -d $config->{file_base};
 
   # Model helper
   $self->helper(model_session => sub {
@@ -43,7 +51,7 @@ sub startup {
   my $auth = $r->under('/s')->to('vonf#auth');
   $auth->websocket('ws/#id' => [id => $re_id])->to('vonf#ws');
   $auth->post('up/#id' => [id => $re_id])->to('vonf#upload');
-  $auth->get('f/#id' => [id => $re_id])->to('vonf#download');
+  $auth->get('f/#id/<file_id:num>' => [id => $re_id])->to('vonf#download');
   $auth->get('logout')->to('vonf#logout');
 }
 

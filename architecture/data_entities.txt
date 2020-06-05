@@ -54,15 +54,14 @@ class "File notification" {
  payload: URL
 }
 class "Session info" {
- id
+ id (DB sequence)
+ ..
  password
  files_limit
  files_current
  peers_limit
  peers_current
- ..
- +get_free_files()
- +get_free_peers()
+ peers_ws
 }
 class "Text of the message" {
  id (DB sequence)

@@ -2,8 +2,12 @@ $(document).ready(function(){
    $('#id').val('');
    $('#form').submit(
       function () {
-         // TODO validate $('#id') here
-         window.location.href = "/c/" + $('#id').val();
+         var id = $('#id').val();
+         if (/^\d{5}$/.exec(id)) {
+            window.location.href = "/c/" + id;
+         } else {
+            alert("ID incorrect!");
+         }
          return false;
       });
 });

@@ -9,16 +9,20 @@
    </head>
    <body>
       <div id="wrapper">
-         <%= $session_id %> | <%= $peer_id %>
+         Session ID: <%= $session_id %> | my peer ID: <%= $peer_id %>
          <input type="hidden" id="session_id" value="<%= $session_id %>">
          <div id="chat">
          </div>
          <br>
          <textarea id="msg_text"></textarea>
-         <input type="button" id="msg_send" value="Send text"></input>
+         <input type="button" id="msg_send" value="Send text (Ctrl+Enter)"></input>
          <br>
-         <input type="file" id="file_file"></input>
+         <br>
+         <form id="file_form">
+         <input type="file" name="file" id="file_file"></input>
+         </form>
          <input type="button" id="file_send" value="Send file"></input>
+         <br>
          <br>
          <input type="button" id="end_session" value="End session"></input>
       </div>

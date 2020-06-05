@@ -1,12 +1,13 @@
 package vonf::Controller::Vonf;
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON qw( encode_json decode_json j );
+use Mojo::Util qw( b64_encode b64_decode encode decode );
 
 my $err = sub {
    # Invalidate session on any errors
    $_[0]->session->{room_pw} = 0;
    $_[0]->session(expires => 1);
-   $_[0]->render('vonf/error', msg => $_[1] // 'Fail');
+   $_[0]->render('vonf/error', msg => $_[1] // 'Fail', status => $_[2] // 418);
 };
 
 my $try_cleanup = sub {
@@ -116,11 +117,9 @@ sub ws {
 
    my $ps_callback = $c->model_session->attach_peer_ws($id, $uid, sub {
          my $json = decode_json($_[1]);
-         # TODO 
          # Callback for any notifications DB -> WS
-         print STDERR "OK DB->WS: @_\n";
          if ($json->{type} eq "text") {
-            # TODO implement on client-side?
+            # TODO implement on client-side to avoid one extra transmission?
             # Skip self messages
             #return if $json->{src} eq $uid;
 
@@ -139,7 +138,8 @@ sub ws {
          } elsif ($json->{type} eq "file" ) {
             return $c->send(j({type => "file", payload => $json->{payload}}));
          } elsif ($json->{type} eq "link" ) {
-            #TODO
+            my $url = $c->url_for("/s/f/$id/" . $json->{payload})->to_abs;
+            $c->send(j({type => "link", payload => $url}));
          } else {
             return $err->($c, 'PSM unknown');
          }
@@ -163,13 +163,54 @@ sub ws {
 }
 
 sub upload {
-   #TODO
-   $_[0]->render(text => 'stub upload');
+   my ($c) = @_;
+   my $id = $c->session->{room_id};
+   my $uid = $c->session->{room_uid};
+   my $base = $c->config->{file_base};
+   my $left = @{$c->req->uploads('file')};
+
+   mkdir "$base/$id" unless -d "$base/$id";
+
+   for my $file (@{$c->req->uploads('file')}) {
+      my $name = b64_encode encode 'UTF-8', $file->filename;
+
+      my $file_id = $c->model_session->send_file($id, $uid, $name, "//id") ;
+      return $err->($c, 'File upload failed') unless defined $file_id;
+
+      my $path = "$base/$id/$file_id";
+      return $err->($c, 'File save failed') if $file != $file->move_to($path);
+      $left--;
+   }
+
+   if ($left == 0) {
+      # Successfully uploaded all files
+      return $c->render(text => 'All files saved!');
+   } else {
+      # Some errors found
+      return $c->render(text => 'Unable to save all files!', status => 418);
+   }
 }
 
 sub download {
-   #TODO
-   $_[0]->render(text => 'stub download');
+   my ($c) = @_;
+   my $id = $c->session->{room_id};
+   my $file_id = $c->stash('file_id');
+   my $file_info = $c->model_session->get_file_info($id, $file_id);
+   return $err->($c, 'File not found', 404) unless defined $file_info;
+
+   my ($file_name, $file_path) = @{$file_info};
+   $file_name = b64_decode $file_name;
+
+   # In general, there is an architectural solution to store the filepath
+   # inside file_info to be able to store files in distributed DB.
+   # So far, the storage is FS and the path is constructed manually:
+   if ($file_path eq "//id") {
+      # Special case to store file on FS
+      $file_path = $c->config->{file_base} . "/$id/$file_id";
+   }
+   
+   my $rc = $c->render_file(filepath => $file_path, filename => $file_name);
+   return $err->($c, 'Unable to find', 404) unless defined $rc;
 }
 
 1;

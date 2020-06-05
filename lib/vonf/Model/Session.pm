@@ -1,7 +1,8 @@
 package vonf::Model::Session;
 use Mojo::Base -base;
-use Mojo::JSON qw( encode_json decode_json j );
+use Mojo::JSON qw( encode_json );
 use Mojo::Util qw( b64_encode b64_decode xml_escape );
+use File::Path qw( remove_tree );
 
 has 'pg';
 has 'config';
@@ -27,16 +28,16 @@ my $id_decrypt = sub {
 my $db_notify = sub {
    my ($c, $id, $type, $src, $payload) = @_;
    return 0 unless defined $payload;
-   $c->pg->pubsub->notify($id => encode_json {
+   my $ps = $c->pg->pubsub;
+   return $ps == $ps->notify($id => encode_json {
          type => $type, src => $src, payload => $payload
       });
 };
 
 # PUBLIC
 sub generate_pw {
-   #TODO
+   #TODO maybe stronger? BTW the cookie is encrypted
    my $password = int(10**5 * rand());
-   print STDERR "PW: $password\n";
    return $password;
 }
 
@@ -44,6 +45,8 @@ sub destroy_session {
    my ($c, $id) = @_;
    return unless defined $id;
 
+   # TODO maybe implement here a timestamp to forcefully kill long sessions
+   # ... to handle unexpected App crashes
    my $result = $c->pg->db->select('Session', ['peers_ws'],
       { id => $id_decrypt->($id) })->array;
    return unless defined $result;
@@ -51,7 +54,8 @@ sub destroy_session {
    my $peers_ws = $result->[0];
    return unless defined $peers_ws and $peers_ws == 0;
 
-   # TODO cleanup filesystem
+   my $uploads = $c->config->{file_base} . "/$id";
+   remove_tree $uploads if -d $uploads;
 
    $c->pg->db->delete('Files', { session_id => $id_decrypt->($id) });
 
@@ -61,7 +65,6 @@ sub destroy_session {
 };
 
 sub create_session {
-   #TODO
    my ($c, $password, $files_limit, $peers_limit) = @_;
 
    defined $_[$_] or return for (0..3);
@@ -79,20 +82,6 @@ sub create_session {
       }, { returning => 'id' })->array->[0];
    
    return $id_encrypt->($id);
-}
-
-sub check_file_available {
-   #TODO
-   my ($c, $id) = @_;
-   
-   return 1;
-}
-
-sub check_peer_available {
-   #TODO
-   my ($c, $id) = @_;
-   
-   return 1;
 }
 
 sub get_password {
@@ -116,14 +105,19 @@ sub check_password {
 }
 
 sub get_file_info {
-   #TODO
    my ($c, $id, $file_id) = @_;
-   
-   return ["filename", "filepath"];
+
+   return unless defined $file_id;
+
+   # Extract message from DB
+   return $c->pg->db->select('Files', ['name', 'path'],
+      { id => $file_id, session_id => $id_decrypt->($id) })->array;
 }
 
 sub get_message {
    my ($c, $id, $msg_id) = @_;
+
+   return unless defined $msg_id;
 
    # Extract message from DB
    my $result = $c->pg->db->select('Messages', ['text'],
@@ -146,14 +140,20 @@ sub send_message {
       }, { returning => 'id' })->array->[0];
 
    # Send DB notification
-   return $c == $db_notify->($c, $id, "text", $src, $msg_id);
+   return $db_notify->($c, $id, "text", $src, $msg_id);
 }
 
 sub send_file {
-   #TODO
-   my ($c, $id, $filename, $filepath) = @_;
+   my ($c, $id, $src, $filename, $filepath) = @_;
 
-   return 1;
+   my $file_id = $c->pg->db->insert('Files', {
+         session_id => $id_decrypt->($id),
+         name => $filename,
+         path => $filepath,
+      }, { returning => 'id' })->array->[0];
+
+   return unless $db_notify->($c, $id, "link", $src, $file_id);
+   return $file_id;
 }
 
 sub attach_peer {
@@ -164,7 +164,6 @@ sub attach_peer {
       $result = $c->pg->db->query('UPDATE "Session" SET peers_current = ' .
          'peers_current + 1 WHERE id = ?', $id_decrypt->($id));
    };
-   print STDERR "($@)($!)\n";
    return unless defined $result;
 
    return $result->rows;

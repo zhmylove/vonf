@@ -3,18 +3,19 @@
    <head>
       <title><%= config->{title} // 'VONF' %></title>
       <script src="/js/jquery-3.5.0.min.js"></script>
+      <script src="/js/qrcode.min.js"></script>
       <script src="/js/start.js"></script>
       <link rel="stylesheet" href="/css/start.css"></link>
    </head>
    <body>
       <div id="wrapper">
-         Session ID: <%= $session_id %>
+         Session ID: <%= $session_id %> Timeout: <%= config->{id_timeout} %>
+         <input type="hidden" id="session_id" value="<%= $session_id %>">
          <br>
-         URL to connect: <%= link_to 'Connect' => "/c/$session_id" %>
+         <div id="qr"></div>
          <br>
-         QR code
-         <br>
-         <%= link_to 'Go home' => '/' %>
+         <input type="button" id="connect" value="Connect"></input>
+         <input type="button" id="end_session" value="End session"></input>
       </div>
    </body>
 </html>
