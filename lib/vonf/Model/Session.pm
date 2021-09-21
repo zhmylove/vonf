@@ -159,6 +159,7 @@ sub send_file {
 sub attach_peer {
    my ($c, $id) = @_;
 
+   # TODO make here real notifications of all waiters; currently: no pubsub
    my $result;
    eval {
       $result = $c->pg->db->query('UPDATE "Session" SET peers_current = ' .
@@ -196,6 +197,19 @@ sub detach_peer_ws {
    };
    $db_notify->($c, $id, "peer", $uid, 0);
    return $c->pg->pubsub->unlisten($id => $ps_callback);
+}
+
+sub get_peers {
+   my ($c, $id) = @_;
+   return unless defined $id;
+
+   my $result = $c->pg->db->select('Session', ['peers_current'],
+      { id => $id_decrypt->($id) })->array;
+   return unless defined $result;
+
+   my $peers_current = $result->[0];
+
+   return $peers_current; # number of peers 1..peers_limit or undef
 }
 
 1;

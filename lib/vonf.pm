@@ -53,6 +53,7 @@ sub startup {
   $auth->post('up/#id' => [id => $re_id])->to('vonf#upload');
   $auth->get('f/#id/<file_id:num>' => [id => $re_id])->to('vonf#download');
   $auth->get('logout')->to('vonf#logout');
+  $auth->get('p/#id' => [id => $re_id])->to('vonf#peers');
 }
 
 1;

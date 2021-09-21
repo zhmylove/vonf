@@ -174,6 +174,7 @@ sub upload {
    for my $file (@{$c->req->uploads('file')}) {
       my $name = b64_encode encode 'UTF-8', $file->filename;
 
+      #TODO avoid races here (send_file will notify peers)
       my $file_id = $c->model_session->send_file($id, $uid, $name, "//id") ;
       return $err->($c, 'File upload failed') unless defined $file_id;
 
@@ -211,6 +212,16 @@ sub download {
    
    my $rc = $c->render_file(filepath => $file_path, filename => $file_name);
    return $err->($c, 'Unable to find', 404) unless defined $rc;
+}
+
+sub peers {
+   my ($c) = @_;
+   my $id = $c->session->{room_id};
+   my $peers = $c->model_session->get_peers($id);
+
+   return $err->($c, 'No peers', 404) unless $peers; # can't be 0 too
+
+   $c->render(text => sprintf '{"p":%d}', 0+$peers);
 }
 
 1;
